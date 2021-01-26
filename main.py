@@ -1,3 +1,5 @@
+import torch
+
 from medmnist.info import INFO
 from medmnist.dataset import PathMNIST, ChestMNIST, DermaMNIST, OCTMNIST, PneumoniaMNIST, RetinaMNIST, \
     BreastMNIST, OrganMNISTAxial, OrganMNISTCoronal, OrganMNISTSagittal
@@ -26,16 +28,43 @@ def main(input_args):
         "augmentations"     --> list of augmenations                                                                                --> list
         "download"          --> download the data                                                                                   --> boolean
     '''
+    # ************************************** train on gpu if possible **********************************************************************************
+    
+    if torch.cuda.is_available():     
+        print('used GPU: ' + torch.cuda.get_device_name(0))
+        device = torch.device("cuda:0")
+        kwar = {'num_workers': 8, 'pin_memory': True}
+        cpu = torch.device("cpu")
+    
+    else:
+        print("Warning: CUDA not found, CPU only.")
+        device = torch.device("cpu")
+        kwar = {}
+        cpu = torch.device("cpu")
+
+    # ************************************** Create Dataloader  *****************************************************************************************
     
     dataset_info = INFO[input_args["data_name"]]
 
     prepare_medmnist = PrepareMedMNIST(input_args, dataset_info)
 
     dataloader_train_labeled = prepare_medmnist.getSubLoader('train', labeled=True)
+    dataloader_train_unlabeled = prepare_medmnist.getSubLoader('train', labeled=False)
+    dataloader_val = prepare_medmnist.getDataLoader('val')
+    dataloader_test = prepare_medmnist.getDataLoader('test')
 
-    print(len(dataloader_train_labeled.dataset))
-    for i in range(len(dataloader_train_labeled.dataset)):
-        print(dataloader_train_labeled.dataset[i][1])
+    # ************************************** Training  ***************************************************************************************************
+    if input_args["task_input"] == "BaseLine":
+        print("==> Baseline-Training...")
+
+    elif input_args["task_input"] == "NoisyStudent":
+        print("==> NoisyStudent-Training...")
+
+    elif input_args["task_input"] == "MTSS":
+        print("==> MTSS-Training...")
+
+    elif input_args["task_input"] == "Pseudolabel":
+        print("==> Pseudolabel-Training...")
     
     
 
