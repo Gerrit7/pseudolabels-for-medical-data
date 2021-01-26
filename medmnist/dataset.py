@@ -95,6 +95,9 @@ class MedMNIST(Dataset):
                                'Go to the homepage to download manually. ' +
                                'https://github.com/MedMNIST/MedMNIST')
 
+    def get_data(self):
+        return (self.img, self.label)
+
 
 class PathMNIST(MedMNIST):
     flag = "pathmnist"
